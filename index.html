@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identidad USM | Tienda Oficial</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c4a3e;
+            --secondary: #d4af37;
+            --accent: #f8f5f0;
+            --dark: #333333;
+            --light: #ffffff;
+            --pink-soft: #fcf4f4;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--accent); color: var(--dark); line-height: 1.6; }
+        
+        header { background-color: var(--light); padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
+        nav button { background: none; border: none; font-size: 16px; margin-left: 20px; cursor: pointer; color: var(--dark); font-weight: 600; }
+        nav button:hover { color: var(--primary); }
+        
+        .hero { background: linear-gradient(rgba(44,74,62,0.85), rgba(44,74,62,0.85)), url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80') center/cover; color: white; text-align: center; padding: 60px 20px; margin-bottom: 30px; }
+        .hero h1 { font-size: 38px; margin-bottom: 10px; }
+        .hero p { font-size: 18px; margin-bottom: 20px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .filters { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 20px; border: 2px solid var(--primary); background: transparent; color: var(--primary); border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .filter-btn.active, .filter-btn:hover { background: var(--primary); color: white; }
+
+        .faculty-section { margin-bottom: 40px; background: var(--light); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .faculty-title { font-size: 24px; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; }
+        
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .product-card { background: var(--light); border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .product-img { width: 100%; height: 220px; object-fit: cover; background: #f0f0f0; }
+        .product-info { padding: 15px; }
+        .product-category { font-size: 12px; color: #777; text-transform: uppercase; letter-spacing: 1px; }
+        .product-name { font-size: 18px; font-weight: bold; margin: 5px 0; color: var(--dark); }
+        .product-desc { font-size: 13px; color: #555; margin-bottom: 10px; }
+        .product-price { font-size: 16px; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        
+        .product-footer { padding: 15px; background: #fafafa; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
+        .select-size, .select-qty { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        .buy-btn { background: #25d366; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; transition: 0.2s; }
+        .buy-btn:hover { background: #1ebe5d; }
+
+        /* Modal Bienvenida / Cupón */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-content h2 { color: var(--primary); margin-bottom: 15px; }
+        .modal-content input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .modal-btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* Panel Admin */
+        .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1100; overflow-y: auto; padding: 20px; }
+        .admin-container { background: white; max-width: 900px; margin: 30px auto; padding: 30px; border-radius: 12px; position: relative; }
+        .close-admin { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
+        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--pink-soft); padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid var(--primary); }
+        .stat-card h3 { font-size: 14px; color: #666; }
+        .stat-card p { font-size: 22px; font-weight: bold; color: var(--primary); margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- MODAL BIENVENIDA Y CUPÓN 30% -->
+    <div class="modal-overlay" id="welcomeModal">
+        <div class="modal-content">
+            <h2>¡Bienvenida a Identidad USM! ✨</h2>
+            <p style="font-size: 14px; margin-bottom: 15px; color: #555;">Regístrate con tus datos básicos para desbloquear automáticamente tu <strong>30% de descuento</strong> en tu primera compra.</p>
+            <form id="registerForm">
+                <input type="text" id="regName" placeholder="Nombre" required>
+                <input type="text" id="regLastName" placeholder="Apellido" required>
+                <input type="email" id="regEmail" placeholder="Correo Electrónico" required>
+                <button type="submit" class="modal-btn">¡Reclamar mi 30% de Descuento!</button>
+            </form>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">IDENTIDAD USM</div>
+        <nav>
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Catálogo</button>
+            <button onclick="openAdminPanel()">Panel de Fundadora</button>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <h1>Merchandising Oficial USM</h1>
+        <p>Lleva el orgullo usemista en cada facultad y carrera con estilo minimalista.</p>
+    </div>
+
+    <div class="container">
+        <!-- FILTROS DE CATEGORÍA -->
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterCategory('all', this)">Todo el Catálogo</button>
+            <button class="filter-btn" onclick="filterCategory('camisa', this)">Camisas ($15)</button>
+            <button class="filter-btn" onclick="filterCategory('hoodie', this)">Hoodies ($25)</button>
+        </div>
+
+        <div id="catalogContainer"></div>
+    </div>
+
+    <!-- PANEL DE FUNDADORA PRIVADO -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-container">
+            <span class="close-admin" onclick="closeAdminPanel()">&times;</span>
+            <h2 style="color: var(--primary); margin-bottom: 20px;">Panel Exclusivo de Fundadora</h2>
+            
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <h3>Visitas Totales</h3>
+                    <p id="statVisits">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Registros / Clientes</h3>
+                    <p id="statRegisters">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Clics en Productos</h3>
+                    <p id="statClicks">0</p>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 10px;">Gráfico de Ventas Mensuales</h3>
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #ddd;">
+                <canvas id="salesChart" height="100"></canvas>
+            </div>
+
+            <h3 style="margin-bottom: 10px;">Registro de Clientes y Leads (Base de Datos)</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientsTableBody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONTADOR DE VISITAS GLOBAL
+        let visits = localStorage.getItem('usm_visits') ? parseInt(localStorage.getItem('usm_visits')) + 1 : 1;
+        localStorage.setItem('usm_visits', visits);
+
+        // BASE DE DATOS DE PRODUCTOS ORGANIZADA POR FACULTAD Y CARRERAS
+        const catalogData = [
+            // FACES
+            {
+                faculty: "FACULTAD DE FACES",
+                items: [
+                    { id: "faces_adm_c", type: "camisa", name: "Camisa FACES - Administración", desc: "Diseño minimalista institucional para la Escuela de Administración.", price: 15, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_adm_h", type: "hoodie", name: "Hoodie FACES - Administración", desc: "Suéter con capucha y alta comodidad para Administración.", price: 25, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_cont_c", type: "camisa", name: "Camisa FACES - Contaduría", desc: "Diseño exclusivo y sobrio para Contaduría Pública.", price: 15, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_cont_h", type: "hoodie", name: "Hoodie FACES - Contaduría", desc: "Hoodie oficial para estudiantes de Contaduría.", price: 25, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_eco_c", type: "camisa", name: "Camisa FACES - Economía", desc: "Estilo elegante representando a la Escuela de Economía.", price: 15, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_eco_h", type: "hoodie", name: "Hoodie FACES - Economía", desc: "Abrigo institucional para economistas usemistas.", price: 25, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_cs_c", type: "camisa", name: "Camisa FACES - Comunicación Social", desc: "Diseño fresco y dinámico para Comunicación Social.", price: 15, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=500&q=80" },
+                    { id: "faces_cs_h", type: "hoodie", name: "Hoodie FACES - Comunicación Social", desc: "Hoodie con branding exclusivo de Comunicación Social.", price: 25, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80" }
+                ]
+            },
+            // DERECHO
+            {
+                faculty: "FACULTAD DE DERECHO",
+                items: [
+                    { id: "der_der_c", type: "camisa", name: "Camisa DERECHO - Derecho", desc: "Elegancia y distinción para la escuela de Leyes.", price: 15, img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=500&q=80" },
+                    { id: "der_der_h", type: "hoodie", name: "Hoodie DERECHO - Derecho", desc: "Confort térmico para largas jornadas de estudio jurídico.", price: 25, img: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=500&q=80" },
+                    { id: "der_ei_c", type: "camisa", name: "Camisa DERECHO - Estudios Internacionales", desc: "Identidad global para Estudios Internacionales.", price: 15, img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=500&q=80" },
+                    { id: "der_ei_h", type: "hoodie", name: "Hoodie DERECHO - Estudios Internacionales", desc: "Hoodie exclusivo de la escuela de RRII.", price: 25, img: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=500&q=80" }
+                ]
+            },
+            // INGENIERÍA Y ARQUITECTURA
+            {
+                faculty: "FACULTAD DE INGENIERÍA Y ARQUITECTURA",
+                items: [
+                    { id: "ing_civ_c", type: "camisa", name: "Camisa - Ing. Civil", desc: "Diseño técnico representativo de Ingeniería Civil.", price: 15, img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_civ_h", type: "hoodie", name: "Hoodie - Ing. Civil", desc: "Resistencia y comodidad para ingenieros civiles.", price: 25, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_ind_c", type: "camisa", name: "Camisa - Ing. Industrial", desc: "Estilo optimizado para Ingeniería Industrial.", price: 15, img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_ind_h", type: "hoodie", name: "Hoodie - Ing. Industrial", desc: "Abrigo oficial de Ingeniería Industrial.", price: 25, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_sis_c", type: "camisa", name: "Camisa - Ing. en Sistemas", desc: "Estética digital para Ingeniería en Sistemas.", price: 15, img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_sis_h", type: "hoodie", name: "Hoodie - Ing. en Sistemas", desc: "El hoodie predilecto para los programadores de Sistemas.", price: 25, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_tel_c", type: "camisa", name: "Camisa - Ing. en Telecomunicaciones", desc: "Conectividad e identidad en Telecomunicaciones.", price: 15, img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_tel_h", type: "hoodie", name: "Hoodie - Ing. en Telecomunicaciones", desc: "Confort institucional de Telecomunicaciones.", price: 25, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_arq_c", type: "camisa", name: "Camisa - Arquitectura", desc: "Diseño minimalista y creativo para Arquitectura.", price: 15, img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80" },
+                    { id: "ing_arq_h", type: "hoodie", name: "Hoodie - Arquitectura", desc: "Suéter con capucha ideal para maquetas y diseño.", price: 25, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80" }
+                ]
+            },
+            // ODONTOLOGÍA
+            {
+                faculty: "FACULTAD DE ODONTOLOGÍA",
+                items: [
+                    { id: "odon_c", type: "camisa", name: "Filipina / Camisa - Odontología", desc: "Estilo clínico minimalista con iconografía dental especializada.", price: 15, img: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=500&q=80" },
+                    { id: "odon_h", type: "hoodie", name: "Hoodie - Odontología", desc: "Hoodie institucional con símbolos de Odontología en la espalda.", price: 25, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80" }
+                ]
+            },
+            // FARMACIA
+            {
+                faculty: "FACULTAD DE FARMACIA",
+                items: [
+                    { id: "farm_c", type: "camisa", name: "Filipina / Camisa - Farmacia", desc: "Diseño farmacéutico con elementos botánicos y químicos en la espalda.", price: 15, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=500&q=80" },
+                    { id: "farm_h", type: "hoodie", name: "Hoodie - Farmacia", desc: "Suéter abrigado con diseño exclusivo de Farmacia.", price: 25, img: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=500&q=80" }
+                ]
+            }
+        ];
+
+        // GESTIÓN DE REGISTRO / CUPÓN 30%
+        const welcomeModal = document.getElementById('welcomeModal');
+        const registerForm = document.getElementById('registerForm');
+
+        if(localStorage.getItem('usm_registered')) {
+            welcomeModal.style.display = 'none';
+        }
+
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const lastName = document.getElementById('regLastName').value;
+            const email = document.getElementById('regEmail').value;
+            const date = new Date().toLocaleDateString();
+
+            let clients = JSON.parse(localStorage.getItem('usm_clients') || '[]');
+            clients.push({ date, name, lastName, email });
+            localStorage.setItem('usm_clients', JSON.stringify(clients));
+            localStorage.setItem('usm_registered', 'true');
+
+            welcomeModal.style.display = 'none';
+            alert(`¡Registro exitoso, ${name}! Tu cupón del 30% de descuento se ha aplicado automáticamente en tus compras.`);
+        });
+
+        // RENDERIZAR CATÁLOGO
+        function renderCatalog(filter = 'all') {
+            const container = document.getElementById('catalogContainer');
+            container.innerHTML = '';
+
+            catalogData.forEach(facultyObj => {
+                const filteredItems = facultyObj.items.filter(item => filter === 'all' || item.type === filter);
+                if(filteredItems.length === 0) return;
+
+                const facultyDiv = document.createElement('div');
+                facultyDiv.className = 'faculty-section';
+                
+                let html = `<h2 class="faculty-title">${facultyObj.faculty}</h2><div class="products-grid">`;
+                
+                filteredItems.forEach(prod => {
+                    html += `
+                        <div class="product-card">
+                            <img src="${prod.img}" alt="${prod.name}" class="product-img">
+                            <div class="product-info">
+                                <span class="product-category">${prod.type.toUpperCase()}</span>
+                                <h3 class="product-name">${prod.name}</h3>
+                                <p class="product-desc">${prod.desc}</p>
+                                <div class="product-price">$${prod.price}.00</div>
+                            </div>
+                            <div class="product-footer">
+                                <select class="select-size" id="size_${prod.id}">
+                                    <option value="XS">Talla: XS</option>
+                                    <option value="S">Talla: S</option>
+                                    <option value="M" selected>Talla: M</option>
+                                    <option value="L">Talla: L</option>
+                                    <option value="XL">Talla: XL</option>
+                                    <option value="XXL">Talla: XXL</option>
+                                    <option value="XXXL">Talla: XXXL</option>
+                                </select>
+                                <select class="select-qty" id="qty_${prod.id}">
+                                    <option value="1">Cantidad: 1</option>
+                                    <option value="2">Cantidad: 2</option>
+                                    <option value="3">Cantidad: 3</option>
+                                    <option value="4">Cantidad: 4</option>
+                                    <option value="5">Cantidad: 5</option>
+                                </select>
+                                <select class="select-size" id="pay_${prod.id}">
+                                    <option value="Pago Móvil">Pago Móvil</option>
+                                    <option value="Divisas">Divisas</option>
+                                </select>
+                                <button class="buy-btn" onclick="buyProduct('${prod.id}', '${prod.name}', ${prod.price})">Comprar / Reservar</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                facultyDiv.innerHTML = html;
+                container.appendChild(facultyDiv);
+            });
+        }
+
+        function filterCategory(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderCatalog(type);
+        }
+
+        // REGISTRAR CLICS Y REDIRECCIÓN A WHATSAPP
+        function buyProduct(id, name, price) {
+            // Contabilizar clic en producto
+            let clicks = JSON.parse(localStorage.getItem('usm_product_clicks') || '{}');
+            clicks[name] = (clicks[name] || 0) + 1;
+            localStorage.setItem('usm_product_clicks', JSON.stringify(clicks));
+
+            // Simular registro de venta mensual (Octubre 2026)
+            let sales = JSON.parse(localStorage.getItem('usm_monthly_sales') || '{"Octubre": 0}');
+            sales["Octubre"] = (sales["Octubre"] || 0) + price;
+            localStorage.setItem('usm_monthly_sales', JSON.stringify(sales));
+
+            const size = document.getElementById(`size_${id}`).value;
+            const qty = document.getElementById(`qty_${id}`).value;
+            const paymentMethod = document.getElementById(`pay_${id}`).value;
+
+            // Datos del comprador (si se registró)
+            const clients = JSON.parse(localStorage.getItem('usm_clients') || '[]');
+            const client = clients.length > 0 ? clients[clients.length - 1] : { name: "Cliente", lastName: "USM", email: "No registrado" };
+
+            // Mensaje personalizado para WhatsApp con el 30% aplicado opcionalmente
+            const whatsappMessage = `Hola, ¡quiero procesar una compra en Identidad USM! ✨%0A%0A*Producto:* ${name}%0A*Talla:* ${size}%0A*Cantidad:* ${qty}%0A*Método de Pago:* ${paymentMethod}%0A*Descuento Aplicado:* 30%%0A%0A*Datos del Comprador:*%0A- Nombre: ${client.name} ${client.lastName}%0A- Correo: ${client.email}`;
+
+            window.open(`https://wa.me/584241309372?text=${whatsappMessage}`, '_blank');
+        }
+
+        // PANEL DE FUNDADORA (CONTRASEÑA: 041160)
+        let salesChartInstance = null;
+        function openAdminPanel() {
+            const pass = prompt("Ingrese el código exclusivo de Fundadora:");
+            if(pass === "041160") {
+                document.getElementById('adminModal').style.display = 'block';
+                loadAdminData();
+            } else if(pass !== null) {
+                alert("Código incorrecto.");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function loadAdminData() {
+            // Visitas
+            document.getElementById('statVisits').innerText = localStorage.getItem('usm_visits') || 1;
+            
+            // Registros
+            const clients = JSON.parse(localStorage.getItem('usm_clients') || '[]');
+            document.getElementById('statRegisters').innerText = clients.length;
+
+            // Clics totales
+            const clicks = JSON.parse(localStorage.getItem('usm_product_clicks') || '{}');
+            let totalClicks = Object.values(clicks).reduce((a, b) => a + b, 0);
+            document.getElementById('statClicks').innerText = totalClicks;
+
+            // Tabla de Clientes
+            const tbody = document.getElementById('clientsTableBody');
+            tbody.innerHTML = '';
+            clients.forEach(c => {
+                tbody.innerHTML += `<tr><td>${c.date}</td><td>${c.name}</td><td>${c.lastName}</td><td>${c.email}</td></tr>`;
+            });
+
+            // Gráfico de Ventas Mes a Mes
+            const salesData = JSON.parse(localStorage.getItem('usm_monthly_sales') || '{"Enero": 0, "Febrero": 0, "Marzo": 0, "Abril": 0, "Mayo": 0, "Junio": 0, "Julio": 0, "Agosto": 0, "Septiembre": 0, "Octubre": 120, "Noviembre": 0, "Diciembre": 0}');
+            
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if(salesChartInstance) salesChartInstance.destroy();
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(salesData),
+                    datasets: [{
+                        label: 'Ventas en USD ($)',
+                        data: Object.values(salesData),
+                        backgroundColor: '#2c4a3e',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Inicializar render
+        renderCatalog();
+    </script>
+</body>
+</html>
